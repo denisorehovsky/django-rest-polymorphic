@@ -70,11 +70,13 @@ class PolymorphicSerializer(serializers.Serializer):
     def create(self, validated_data):
         resource_type = validated_data.pop(self.resource_type_field_name)
         serializer = self._get_serializer_from_resource_type(resource_type)
+        serializer.is_valid(raise_exception=True)
         return serializer.create(validated_data)
 
     def update(self, instance, validated_data):
         resource_type = validated_data.pop(self.resource_type_field_name)
         serializer = self._get_serializer_from_resource_type(resource_type)
+        serializer.is_valid(raise_exception=True)
         return serializer.update(instance, validated_data)
 
     # --------------
