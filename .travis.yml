@@ -51,18 +51,32 @@ matrix:
 
     - python: 3.7
       env: TOXENV=py37-django111-drf37
+      dist: xenial
+      sudo: required
     - python: 3.7
       env: TOXENV=py37-django111-drf38
+      dist: xenial
+      sudo: required
     - python: 3.7
       env: TOXENV=py37-django20-drf37
+      dist: xenial
+      sudo: required
     - python: 3.7
       env: TOXENV=py37-django20-drf38
+      dist: xenial
+      sudo: required
     - python: 3.7
       env: TOXENV=py37-django21-drf38
+      dist: xenial
+      sudo: required
     - python: 3.7
       env: TOXENV=py37-djangomaster-drf37
+      dist: xenial
+      sudo: required
     - python: 3.7
       env: TOXENV=py37-djangomaster-drf38
+      dist: xenial
+      sudo: required
 
 install:
   - travis_retry pip install -U tox-travis
