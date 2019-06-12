@@ -61,8 +61,12 @@ class PolymorphicSerializer(serializers.Serializer):
         return ret
 
     def to_internal_value(self, data):
-        resource_type = self._get_resource_type_from_mapping(data)
-        serializer = self._get_serializer_from_resource_type(resource_type)
+        if self.partial and self.instance:
+            resource_type = self.to_resource_type(self.instance)
+            serializer = self._get_serializer_from_model_or_instance(self.instance)
+        else:
+            resource_type = self._get_resource_type_from_mapping(data)
+            serializer = self._get_serializer_from_resource_type(resource_type)
 
         ret = serializer.to_internal_value(data)
         ret[self.resource_type_field_name] = resource_type

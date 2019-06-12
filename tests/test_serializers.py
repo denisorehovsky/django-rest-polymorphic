@@ -121,7 +121,6 @@ class TestPolymorphicSerializer:
         instance = BlogBase.objects.create(name='blog', slug='blog')
         data = {
             'name': 'new-blog',
-            'resourcetype': 'BlogBase'
         }
 
         serializer = BlogPolymorphicSerializer(
