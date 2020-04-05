@@ -1,10 +1,11 @@
 from collections.abc import Mapping
-from six import string_types
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
+from django.utils.module_loading import import_string
 from rest_framework import serializers
 from rest_framework.fields import empty
+from six import string_types
 
 
 class PolymorphicSerializer(serializers.Serializer):
@@ -33,6 +34,8 @@ class PolymorphicSerializer(serializers.Serializer):
         model_serializer_mapping = self.model_serializer_mapping
         self.model_serializer_mapping = {}
         self.resource_type_model_mapping = {}
+        self.serializer_args = args
+        self.serializer_kwargs = kwargs
 
         for model, serializer in model_serializer_mapping.items():
             resource_type = self.to_resource_type(model)
@@ -90,14 +93,13 @@ class PolymorphicSerializer(serializers.Serializer):
             child_valid = serializer.is_valid(*args, **kwargs)
             self._errors.update(serializer.errors)
         return valid and child_valid
-    
+
     def run_validation(self, data=empty):
         resource_type = self._get_resource_type_from_mapping(data)
         serializer = self._get_serializer_from_resource_type(resource_type)
         validated_data = serializer.run_validation(data)
         validated_data[self.resource_type_field_name] = resource_type
         return validated_data
-
 
     # --------------
     # Implementation
@@ -120,7 +122,13 @@ class PolymorphicSerializer(serializers.Serializer):
 
         for klass in model.mro():
             if klass in self.model_serializer_mapping:
-                return self.model_serializer_mapping[klass]
+                serializer = self.model_serializer_mapping[klass]
+                if isinstance(serializer, str):
+                    serializer = import_string(serializer)(
+                        *self.serializer_args, **self.serializer_kwargs
+                    )
+                    serializer.parent = self
+                return serializer
 
         raise KeyError(
             '`{cls}.model_serializer_mapping` is missing '

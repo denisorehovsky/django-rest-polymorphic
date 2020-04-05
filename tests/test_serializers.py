@@ -5,7 +5,7 @@ import pytest
 from rest_polymorphic.serializers import PolymorphicSerializer
 
 from tests.models import BlogBase, BlogOne, BlogTwo
-from tests.serializers import BlogPolymorphicSerializer
+from tests.serializers import BlogPolymorphicSerializer, BlogOneSerializer, BlogTwoSerializer
 
 pytestmark = pytest.mark.django_db
 
@@ -147,9 +147,28 @@ class TestPolymorphicSerializer:
 
         data['slug'] = 'test-blog-slug-new'
         duplicate = BlogPolymorphicSerializer(data=data)
-        
+
         assert not duplicate.is_valid()
         assert 'non_field_errors' in duplicate.errors
         err = duplicate.errors['non_field_errors']
 
         assert err == ['The fields info, about must make a unique set.']
+
+    def test_lazy_loading_child_serializers(self):
+        class LazyLoadingPolymorphicSerializer(PolymorphicSerializer):
+            model_serializer_mapping = {
+                BlogOne: 'tests.serializers.BlogOneSerializer',
+                BlogTwo: 'tests.serializers.BlogTwoSerializer',
+            }
+
+        instance = BlogOne.objects.create(name='blog', slug='blog', info='info')
+        serializer = LazyLoadingPolymorphicSerializer(instance)
+
+        assert isinstance(
+            serializer._get_serializer_from_model_or_instance(BlogOne),
+            BlogOneSerializer
+        )
+        assert isinstance(
+            serializer._get_serializer_from_model_or_instance(BlogTwo),
+            BlogTwoSerializer
+        )
