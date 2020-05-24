@@ -92,6 +92,11 @@ class PolymorphicSerializer(serializers.Serializer):
         return valid and child_valid
     
     def run_validation(self, data=empty):
+        
+        if self.allow_null and data is None:
+            # If allow_null is present, allow None as valid
+            return None
+        
         resource_type = self._get_resource_type_from_mapping(data)
         serializer = self._get_serializer_from_resource_type(resource_type)
         validated_data = serializer.run_validation(data)
