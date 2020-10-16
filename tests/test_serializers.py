@@ -4,8 +4,8 @@ import pytest
 
 from rest_polymorphic.serializers import PolymorphicSerializer
 
-from tests.models import BlogBase, BlogOne, BlogTwo
-from tests.serializers import BlogPolymorphicSerializer
+from tests.models import BlogBase, BlogOne, BlogTwo, Webpage
+from tests.serializers import BlogPolymorphicSerializer, WebpageSerializer
 
 pytestmark = pytest.mark.django_db
 
@@ -147,9 +147,30 @@ class TestPolymorphicSerializer:
 
         data['slug'] = 'test-blog-slug-new'
         duplicate = BlogPolymorphicSerializer(data=data)
-        
+
         assert not duplicate.is_valid()
         assert 'non_field_errors' in duplicate.errors
         err = duplicate.errors['non_field_errors']
 
         assert err == ['The fields info, about must make a unique set.']
+
+
+class TestNestedPolymorphicSerializer:
+    """ Test nesting a polymorphic serializer into another serializer """
+
+    def test_partial_update(self):
+        """ partial update that does nothing to the child blog """
+
+        blog = BlogBase.objects.create(name='test-blog', slug='blog')
+        webpage = Webpage.objects.create(url='test-url', blog=blog)
+        data = {
+            'url': 'new-url',
+        }
+
+        serializer = WebpageSerializer(
+            webpage, data=data, partial=True
+        )
+        assert serializer.is_valid()
+
+        serializer.save()
+        assert webpage.url == 'new-url'
