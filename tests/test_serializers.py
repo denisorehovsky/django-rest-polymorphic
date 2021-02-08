@@ -147,9 +147,23 @@ class TestPolymorphicSerializer:
 
         data['slug'] = 'test-blog-slug-new'
         duplicate = BlogPolymorphicSerializer(data=data)
-        
+
         assert not duplicate.is_valid()
         assert 'non_field_errors' in duplicate.errors
         err = duplicate.errors['non_field_errors']
 
         assert err == ['The fields info, about must make a unique set.']
+
+    def test_extra_kwargs_applied(self):
+        data = {
+            'name': 'test-blog',
+            'slug': 'test-blog-slug',
+            'info': 'test-blog-info',
+            'resourcetype': 'BlogThree'
+        }
+
+        serializer = BlogPolymorphicSerializer(data=data, child_kwargs={"partial": True})
+
+        assert not serializer.partial
+        for child in serializer.model_serializer_mapping.values():
+            assert child.partial

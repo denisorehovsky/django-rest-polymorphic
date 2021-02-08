@@ -13,3 +13,4 @@ Contributors
 * Jeff Hackshaw <jeffrey.hackshaw@gmail.com>
 * TFranzel
 * Ignacio Losiggio <iglosiggio@gmail.com>
+* Nick Sarbicki <nick.a.sarbicki@gmail.com>
