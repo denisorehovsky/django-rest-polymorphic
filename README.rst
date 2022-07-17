@@ -190,3 +190,29 @@ Now, the request for creating new object will look like this:
 .. code-block:: bash
 
     $ http POST "http://localhost:8000/projects/" projecttype="artproject" topic="Guernica" artist="Picasso"
+
+
+Pass additional keyword arguments to child serializers
+------------------------------------------------------
+
+It is also possible to pass extra keyword arguments intended only for the child serializers. For instance a child serializer using `Flex Fields <https://github.com/rsinger86/drf-flex-fields>`_.
+
+With serializers such as:
+
+.. code-block:: python
+
+    class SomeModelFlexSerializer(FlexFieldsModelSerializer):
+        class Meta:
+            model = SomeModel
+
+
+    class ProjectPolymorphicSerializer(PolymorphicSerializer):
+        model_serializer_mapping = {
+            SomeModel: SomeModelFlexSerializer
+        }
+
+Extra keyword arguments could be passed to the child serializer like so:
+
+.. code-block::python
+
+    ProjectPolymorphicSerializer(data, child_kwargs={"omit": ["field_name"]})

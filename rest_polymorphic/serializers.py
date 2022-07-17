@@ -27,17 +27,18 @@ class PolymorphicSerializer(serializers.Serializer):
             )
         return super(PolymorphicSerializer, cls).__new__(cls, *args, **kwargs)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, child_kwargs=None, **kwargs):
         super(PolymorphicSerializer, self).__init__(*args, **kwargs)
 
         model_serializer_mapping = self.model_serializer_mapping
         self.model_serializer_mapping = {}
         self.resource_type_model_mapping = {}
+        child_kwargs = child_kwargs or {}
 
         for model, serializer in model_serializer_mapping.items():
             resource_type = self.to_resource_type(model)
             if callable(serializer):
-                serializer = serializer(*args, **kwargs)
+                serializer = serializer(*args, **child_kwargs, **kwargs)
                 serializer.parent = self
 
             self.resource_type_model_mapping[resource_type] = model
