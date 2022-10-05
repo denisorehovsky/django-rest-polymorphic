@@ -46,6 +46,12 @@ class PolymorphicSerializer(serializers.Serializer):
     # ----------
     # Public API
 
+    @classmethod
+    def register_model_serializer_mapping(cls, model, serializer):
+        """Register mapping between model and serializer."""
+
+        cls.model_serializer_mapping[model] = serializer
+
     def to_resource_type(self, model_or_instance):
         return model_or_instance._meta.object_name
 

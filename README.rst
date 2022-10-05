@@ -100,6 +100,41 @@ Then you have to create a polymorphic serializer that serves as a mapper between
             ResearchProject: ResearchProjectSerializer
         }
 
+Alternatively, you can create a polymorphic serializer with an empty mapping, then register the models and serializer mappings later (useful for including serializers from other apps):
+
+.. code-block:: python
+
+    # serializers.py
+    from rest_polymorphic.serializers import PolymorphicSerializer
+
+
+    class ProjectPolymorphicSerializer(PolymorphicSerializer):
+        model_serializer_mapping = {}
+
+.. code-block:: python
+
+    # apps.py
+    from django.apps import AppConfig
+
+
+    class MyAppConfig(AppConfig):
+        name = 'myapp'
+
+        def ready(self):
+            # place the imports and registrations here, so they're only ever called once
+            from .serializers import ProjectSerializer, ArtProjectSerializer, ResearchProjectSerializer
+            from .models import Project, ArtProject, ResearchProject
+
+            ProjectPolymorphicSerializer.register_model_serializer_mapping(
+                Project, ProjectSerializer
+            )
+            ProjectPolymorphicSerializer.register_model_serializer_mapping(
+                ArtProject, ArtProjectSerializer
+            )
+            ProjectPolymorphicSerializer.register_model_serializer_mapping(
+                ResearchProject, ResearchProjectSerializer
+            )
+
 Create viewset with serializer_class equals to your polymorphic serializer:
 
 .. code-block:: python

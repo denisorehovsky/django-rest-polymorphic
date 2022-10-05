@@ -4,8 +4,10 @@ import pytest
 
 from rest_polymorphic.serializers import PolymorphicSerializer
 
-from tests.models import BlogBase, BlogOne, BlogTwo
-from tests.serializers import BlogPolymorphicSerializer
+from tests.models import BlogBase, BlogOne, BlogTwo, BlogThree
+from tests.serializers import BlogPolymorphicSerializer, BlogBaseSerializer, \
+    BlogOneSerializer, BlogTwoSerializer, BlogThreeSerializer
+
 
 pytestmark = pytest.mark.django_db
 
@@ -40,6 +42,28 @@ class TestPolymorphicSerializer:
     def test_each_serializer_has_context(self, mocker):
         context = mocker.MagicMock()
         serializer = BlogPolymorphicSerializer(context=context)
+        for inner_serializer in serializer.model_serializer_mapping.values():
+            assert inner_serializer.context == context
+
+    def test_each_registered_serializer_has_context(self, mocker):
+        class RegisteredBlogPolymorphicSerializer(PolymorphicSerializer):
+            model_serializer_mapping = {}
+
+        RegisteredBlogPolymorphicSerializer.register_model_serializer_mapping(
+            BlogBase, BlogBaseSerializer
+        )
+        RegisteredBlogPolymorphicSerializer.register_model_serializer_mapping(
+            BlogOne, BlogOneSerializer
+        )
+        RegisteredBlogPolymorphicSerializer.register_model_serializer_mapping(
+            BlogTwo, BlogTwoSerializer
+        )
+        RegisteredBlogPolymorphicSerializer.register_model_serializer_mapping(
+            BlogThree, BlogThreeSerializer
+        )
+
+        context = mocker.MagicMock()
+        serializer = RegisteredBlogPolymorphicSerializer(context=context)
         for inner_serializer in serializer.model_serializer_mapping.values():
             assert inner_serializer.context == context
 
